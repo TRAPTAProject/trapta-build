@@ -1,3 +1,5 @@
+# syntax = docker/dockerfile:1.3
+
 FROM ubuntu:18.04
 
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
@@ -26,16 +28,29 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
     libgl1-mesa-glx \
     libgl1-mesa-dev \
     python \
-    chrpath 
+    chrpath \
+    zlib1g-dev \
+    liblzma-dev \
+    libbz2-dev \
+    && apt-get clean cache
 
-RUN wget https://download.qt.io/archive/qt/5.12/5.12.9/single/qt-everywhere-src-5.12.9.tar.xz \
-    && tar xf qt-everywhere-src-5.12.9.tar.xz \
-    && rm qt-everywhere-src-5.12.9.tar.xz \
-    && cd qt-everywhere-src-5.12.9 \
-    && rm -rf web* qt3d qtmultimedia qtvirtualkeyboard qtscript qtremoteobjects qtlocation qtandroidextras qtcanvas3d qtcharts qtdatavis3d qtgamepad qtmacextras qtpurchasing qtscxml qtsensors qtserialbus qtserialport qtspeech qtvirtualkeyboard qtwinextras qtwebchannel qtwebengine qtwebglplugin qtwebsockets qtwebview qtwayland qtxmlpatterns qtgraphicaleffects qtconnectivity qtactiveqt qtnetworkauth qttools qtlottie qtquick3d qtquicktimeline \
-    && ./configure -opensource -nomake tests -nomake examples -qt-xcb -no-icu -confirm-license -no-dbus -sql-sqlite \
+RUN wget -q https://download.qt.io/archive/qt/5.15/5.15.8/single/qt-everywhere-opensource-src-5.15.8.tar.xz \
+    && tar xf qt-everywhere-opensource-src-5.15.8.tar.xz \
+    && rm qt-everywhere-opensource-src-5.15.8.tar.xz \
+    && cd qt-everywhere-src-5.15.8 \
+    && rm -rf web* qt3d qtmultimedia qtvirtualkeyboard qtscript qtremoteobjects qtlocation qtandroidextras qtcanvas3d qtcharts qtdatavis3d qtgamepad qtmacextras qtpurchasing qtscxml qtsensors qtserialbus qtserialport qtspeech qtvirtualkeyboard qtwinextras qtwebchannel qtwebengine qtwebglplugin qtwebsockets qtwebview qtwayland qtxmlpatterns qtgraphicaleffects qtconnectivity qtactiveqt qtnetworkauth qtlottie qtquick3d qtquicktimeline \
+    && ./configure -opensource -nomake tests -nomake examples -no-icu -confirm-license -no-dbus -sql-sqlite \
     && make \
     && make install \
-    && cd .. \
-    && rm -rf qt-everywhere-src-5.12.9
+    && rm -rf qt-everywhere-src-5.15.8
 
+ENV PATH="${PATH}:/usr/local/Qt-5.15.8/bin/"
+
+RUN wget https://download.qt.io/official_releases/qt-installer-framework/4.5.1/installer-framework-opensource-src-4.5.1.tar.xz \
+    && tar xf installer-framework-opensource-src-4.5.1.tar.xz \
+    && rm installer-framework-opensource-src-4.5.1.tar.xz \
+    && cd installer-framework-opensource-src-4.5 \
+    && qmake \
+    && make \
+    && make install \
+    && rm -rf installer-framework-opensource-src-4.5
